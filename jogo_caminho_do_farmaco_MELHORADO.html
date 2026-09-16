@@ -1,0 +1,268 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Complete o Caminho do Fármaco</title>
+<style>
+:root{--bg:#eef5ff;--card:#ffffff;--ink:#142b44;--accent:#2563eb;--accent2:#06b6d4;--ok:#16a34a;--bad:#dc2626;--muted:#64748b;--gold:#f59e0b;--shadow:0 16px 40px rgba(15,45,80,.12)}
+*{box-sizing:border-box}
+body{margin:0;font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",Arial,sans-serif;background:
+radial-gradient(circle at 10% 0%,#dbeafe 0,transparent 30%),
+radial-gradient(circle at 90% 10%,#cffafe 0,transparent 28%),var(--bg);color:var(--ink);min-height:100vh}
+body:before{content:"";position:fixed;inset:0;pointer-events:none;background-image:radial-gradient(#2563eb14 1px,transparent 1px);background-size:22px 22px;z-index:-1}
+header{background:linear-gradient(135deg,#123d6b 0%,#2563eb 55%,#06b6d4 100%);color:white;padding:38px 18px;text-align:center;box-shadow:0 8px 30px #123d6b33;position:relative;overflow:hidden} header:after{content:"✦  🧬  💊  🩸  🧪  🫘";position:absolute;left:0;right:0;bottom:-8px;opacity:.13;font-size:54px;letter-spacing:18px;white-space:nowrap}
+header h1{margin:0 0 8px;font-size:clamp(30px,5vw,48px);text-shadow:0 3px 14px #001b3d55;position:relative;z-index:1} header p{margin:0;font-size:17px;opacity:.95;position:relative;z-index:1}
+.container{max-width:1120px;margin:auto;padding:22px}
+.screen{display:none}.screen.active{display:block}
+.card{background:rgba(255,255,255,.94);border:1px solid #dce8f5;border-radius:22px;padding:28px;margin:18px 0;box-shadow:var(--shadow);backdrop-filter:blur(8px);animation:cardIn .35s ease both}
+h2{margin-top:0}.center{text-align:center}
+button{border:0;border-radius:14px;padding:14px 20px;background:linear-gradient(135deg,#2563eb,#1d4ed8);color:white;font-weight:800;cursor:pointer;font-size:15px;margin:5px;box-shadow:0 7px 16px #2563eb33;transition:transform .16s,box-shadow .16s,filter .16s}
+button:hover{filter:brightness(1.06);transform:translateY(-2px);box-shadow:0 10px 20px #2563eb3d} button:active{transform:translateY(0)} button:disabled{cursor:not-allowed;opacity:.65;transform:none} button.secondary{background:#718397}
+button.success{background:var(--ok)} button.danger{background:var(--bad)}
+.progress{height:15px;background:#d9e7f5;border-radius:99px;overflow:hidden;margin:12px 0 20px;box-shadow:inset 0 2px 5px #123d6b18}.bar{height:100%;background:linear-gradient(90deg,#2563eb,#06b6d4);width:0;transition:width .45s ease;position:relative}.bar:after{content:"";position:absolute;inset:0;background:linear-gradient(90deg,transparent,#ffffff66,transparent);animation:shine 1.7s linear infinite}
+.instructions{background:linear-gradient(135deg,#eff6ff,#ecfeff);border:1px solid #cfe3f8;border-left:6px solid #2563eb;padding:16px;border-radius:14px;text-align:left}
+.path{display:flex;gap:12px;flex-wrap:wrap;align-items:center;justify-content:center;margin:26px 0;padding:18px;background:linear-gradient(135deg,#f8fbff,#f0f9ff);border:1px solid #dce9f5;border-radius:20px}
+.slot{width:165px;min-height:102px;border:2px dashed #94a9bd;border-radius:16px;padding:12px;text-align:center;background:#ffffff;transition:.2s;box-shadow:0 4px 12px #123d6b0c}.slot:hover{border-color:#2563eb;transform:translateY(-2px)}
+.slot.filled{border-style:solid;border-color:#38a8e8;background:linear-gradient(135deg,#eff8ff,#ecfeff);animation:pop .25s ease}.slot small{display:block;color:var(--muted);margin-bottom:5px}
+.arrow{font-size:26px}.pieces{display:flex;flex-wrap:wrap;gap:12px;justify-content:center}
+.piece{padding:15px 19px;border-radius:15px;background:white;border:2px solid #8db8d8;cursor:grab;font-weight:800;box-shadow:0 5px 14px #123d6b14;transition:.18s}.piece:hover{transform:translateY(-3px) scale(1.02);border-color:#2563eb;box-shadow:0 10px 22px #2563eb20}
+.piece.used{opacity:.35;cursor:not-allowed}.feedback{min-height:28px;font-weight:700;margin:12px 0}.ok{color:var(--ok)}.bad{color:var(--bad)}
+.options{display:grid;gap:12px}.option{text-align:left;background:linear-gradient(135deg,#fbfdff,#f5f9fd);color:var(--ink);border:2px solid #d7e2ec;box-shadow:none}.option.correct{border-color:#16a34a;background:#ecfdf3;animation:pop .25s ease}.option.wrong{border-color:#dc2626;background:#fff1f2;animation:shake .35s ease}
+.score{font-size:18px;font-weight:900;text-align:right;background:#fff;border:1px solid #dce8f5;border-radius:14px;padding:9px 14px;display:inline-block;float:right;box-shadow:0 5px 15px #123d6b12}.score:before{content:"🏆 ";}.stage{display:grid;grid-template-columns:92px 1fr;gap:18px;align-items:center;padding:18px;border-radius:17px;background:linear-gradient(135deg,#f8fbff,#f0f9ff);border:1px solid #dce9f5;margin:12px 0;transition:.2s}.stage:hover{transform:translateX(4px);box-shadow:0 8px 20px #123d6b12}.icon{font-size:62px;text-align:center;filter:drop-shadow(0 5px 6px #123d6b1c)}
+.glossary{display:grid;grid-template-columns:repeat(auto-fit,minmax(210px,1fr));gap:12px}.term{background:linear-gradient(135deg,#fbfdff,#f3f8fd);border:1px solid #dbe5ed;border-radius:15px;padding:16px;transition:.2s}.term:hover{transform:translateY(-3px);box-shadow:0 10px 22px #123d6b12}.term b{display:block;margin-bottom:5px}
+.badge{display:inline-block;background:#eaf4fc;color:#175788;padding:7px 11px;border-radius:99px;font-size:13px;font-weight:700}
+@media(max-width:700px){.slot{width:135px}.arrow{display:none}.stage{grid-template-columns:1fr}.icon{font-size:48px}}
+footer{text-align:center;color:var(--muted);padding:30px}
+@keyframes cardIn{from{opacity:0;transform:translateY(10px)}to{opacity:1;transform:none}}
+@keyframes pop{50%{transform:scale(1.04)}}
+@keyframes shake{25%{transform:translateX(-5px)}75%{transform:translateX(5px)}}
+@keyframes shine{to{transform:translateX(100%)}}
+.confetti{position:fixed;top:-20px;font-size:22px;pointer-events:none;z-index:9999;animation:fall 1.2s ease-in forwards}
+@keyframes fall{to{transform:translateY(105vh) rotate(540deg);opacity:0}}
+</style>
+</head>
+<body>
+<header>
+<h1>💊 Complete o Caminho do Fármaco</h1>
+<p>Jogo virtual de Farmacocinética e Farmacodinâmica</p>
+</header>
+
+<noscript><div style="padding:16px;background:#fff0f0;color:#8b1e1e;text-align:center;font-weight:bold">
+Este jogo precisa de JavaScript ativado. Se a pré-visualização do aplicativo não executar o jogo,
+baixe o arquivo e abra-o no Safari, Chrome ou outro navegador.
+</div></noscript><div class="container">
+<div class="score">Pontuação: <span id="score">0</span> ⭐</div>
+<div class="progress"><div class="bar" id="bar"></div></div>
+
+<section id="home" class="screen active">
+<div class="card center">
+<h2>🎯 Desafio</h2>
+<p>Organize o percurso do medicamento no organismo, compreenda o que acontece em cada etapa e teste seus conhecimentos com situações clínicas.</p>
+<div style="margin:12px 0"><span class="badge">🎮 INTERATIVO</span> <span class="badge">🔊 SOM DE ACERTO</span> <span class="badge">📚 FARMACOLOGIA</span></div><div class="instructions"><b>Como jogar:</b> clique em uma peça e depois no espaço correspondente. No computador, também é possível arrastar as peças.</div>
+<br><button id="startBtn" type="button">▶ Iniciar jogo</button>
+</div>
+<div class="card">
+<h2>O que você vai aprender?</h2>
+<ul>
+<li>Administração, absorção, distribuição, metabolismo e excreção (ADME).</li>
+<li>Relação entre concentração do fármaco e efeito.</li>
+<li>Alvos farmacológicos e mecanismo de ação.</li>
+<li>Como alterações renais, hepáticas e interações podem modificar a resposta.</li>
+</ul>
+</div>
+</section>
+
+<section id="order" class="screen">
+<div class="card">
+<h2>🧩 Fase 1 — Complete o caminho</h2>
+<p>Coloque as cinco etapas na ordem correta.</p>
+<div class="path" id="path"></div>
+<div class="pieces" id="pieces"></div>
+<div class="feedback" id="orderFeedback"></div>
+<div class="center"><button id="checkOrder" onclick="checkOrder()">✓ Conferir</button></div>
+</div>
+</section>
+
+<section id="adme" class="screen">
+<div class="card">
+<h2>🔬 Fase 2 — Explore o ADME</h2>
+<p>Clique nas etapas para descobrir o que acontece com o medicamento.</p>
+<div id="admeContent"></div>
+<div class="center"><button onclick="nextScreen('pharma')">Continuar →</button></div>
+</div>
+</section>
+
+<section id="pharma" class="screen">
+<div class="card">
+<h2>🎯 Fase 3 — Farmacodinâmica</h2>
+<div class="stage"><div class="icon">🎯</div><div><b>Alvo farmacológico:</b> receptor, enzima, canal iônico ou outro componente celular ao qual o fármaco se liga ou sobre o qual atua.</div></div>
+<div class="stage"><div class="icon">🧲</div><div><b>Ligação ao alvo:</b> a interação pode ativar, bloquear ou modificar uma função biológica.</div></div>
+<div class="stage"><div class="icon">📈</div><div><b>Concentração × efeito:</b> em geral, mudanças na concentração no local de ação podem modificar a intensidade do efeito, até os limites do sistema farmacológico.</div></div>
+<div class="stage"><div class="icon">✅</div><div><b>Efeito terapêutico:</b> é a resposta desejada que leva ao benefício clínico.</div></div>
+<div class="stage"><div class="icon">⚠️</div><div><b>Efeitos adversos:</b> respostas indesejadas que podem ocorrer dependendo do fármaco, dose, paciente e contexto clínico.</div></div>
+<div class="center"><button onclick="nextScreen('quiz')">Ir para o quiz →</button></div>
+</div>
+</section>
+
+<section id="quiz" class="screen">
+<div class="card">
+<h2>🧠 Fase 4 — Quiz</h2>
+<div id="quizBox"></div>
+</div>
+</section>
+
+<section id="case" class="screen">
+<div class="card">
+<h2>🏥 Fase 5 — Situação-problema</h2>
+<p><b>Caso:</b> um paciente apresenta redução importante da função renal e utiliza um medicamento cuja eliminação depende significativamente dos rins. O que pode acontecer se a dose não for ajustada quando necessário?</p>
+<div class="options">
+<button class="option" onclick="caseAnswer(this,false)">A) A eliminação sempre aumenta e a concentração cai.</button>
+<button class="option" onclick="caseAnswer(this,true)">B) A eliminação pode diminuir, aumentando a exposição ao fármaco e o risco de efeitos adversos.</button>
+<button class="option" onclick="caseAnswer(this,false)">C) A função renal não interfere na farmacocinética.</button>
+<button class="option" onclick="caseAnswer(this,false)">D) O medicamento deixa de ser absorvido pelo intestino.</button>
+</div>
+<div id="caseFeedback" class="feedback"></div>
+</div>
+</section>
+
+<section id="glossary" class="screen">
+<div class="card">
+<h2>📖 Fase 6 — Glossário farmacológico</h2>
+<div class="glossary">
+<div class="term"><b>Farmacocinética</b>O que o organismo faz com o fármaco.</div>
+<div class="term"><b>Farmacodinâmica</b>O que o fármaco faz no organismo.</div>
+<div class="term"><b>Absorção</b>Entrada do fármaco na circulação sistêmica.</div>
+<div class="term"><b>Distribuição</b>Repartição do fármaco entre sangue e tecidos.</div>
+<div class="term"><b>Metabolismo</b>Transformação química do fármaco, frequentemente no fígado.</div>
+<div class="term"><b>Excreção</b>Remoção do fármaco ou metabólitos do organismo.</div>
+<div class="term"><b>Biodisponibilidade</b>Fração da dose que chega à circulação sistêmica, de acordo com a definição aplicável.</div>
+<div class="term"><b>Meia-vida</b>Tempo necessário para a concentração plasmática diminuir em 50%, em condições farmacocinéticas apropriadas.</div>
+<div class="term"><b>Concentração plasmática</b>Quantidade de fármaco presente em determinado volume de plasma.</div>
+<div class="term"><b>Receptor</b>Alvo molecular capaz de reconhecer e responder a um ligante.</div>
+<div class="term"><b>Agonista</b>Substância que ativa um receptor e produz resposta.</div>
+<div class="term"><b>Antagonista</b>Substância que reduz ou impede a ação de um agonista ao se ligar ao alvo.</div>
+</div>
+<div class="center"><button onclick="finishGame()">🏆 Finalizar</button></div>
+</div>
+</section>
+
+<section id="finish" class="screen">
+<div class="card center">
+<h2>🎉 Parabéns!</h2>
+<p>Você completou o caminho do fármaco e revisou conceitos de farmacocinética e farmacodinâmica.</p>
+<p style="font-size:28px"><b>⭐ <span id="finalScore">0</span> pontos</b></p>
+<p id="performance"></p>
+<button onclick="location.reload()">🔄 Jogar novamente</button>
+</div>
+</section>
+</div>
+<footer>Material didático — TDE de Farmacologia | Complete o Caminho do Fármaco</footer>
+
+<script>
+const stages=[
+{name:"Administração",icon:"💊",text:"O medicamento é introduzido no organismo pela via escolhida. A via influencia a velocidade de início do efeito e, em algumas situações, a biodisponibilidade."},
+{name:"Absorção",icon:"🧬",text:"É a passagem do fármaco do local de administração para a circulação sistêmica. Pode ser influenciada pela via, formulação, fluxo sanguíneo, pH e outros fatores."},
+{name:"Distribuição",icon:"🩸",text:"Após chegar ao sangue, o fármaco pode se distribuir para diferentes tecidos. Fluxo sanguíneo, ligação às proteínas plasmáticas e características do fármaco influenciam esse processo."},
+{name:"Metabolismo",icon:"🫀",text:"O fármaco pode sofrer biotransformação, frequentemente no fígado. Enzimas e interações medicamentosas podem alterar a velocidade desse processo."},
+{name:"Excreção",icon:"🫘",text:"O fármaco e/ou seus metabólitos são removidos do organismo. Os rins são uma via importante de eliminação; alterações da função renal podem modificar a exposição ao medicamento."}
+];
+
+const AudioFX = {
+  ctx:null,
+  init(){
+    if(!this.ctx) this.ctx = new (window.AudioContext||window.webkitAudioContext)();
+    if(this.ctx.state==="suspended") this.ctx.resume();
+  },
+  tone(freq,duration,start=0,type="sine",gain=.06){
+    this.init();
+    const o=this.ctx.createOscillator(), g=this.ctx.createGain();
+    o.type=type; o.frequency.value=freq;
+    g.gain.setValueAtTime(0.0001,this.ctx.currentTime+start);
+    g.gain.exponentialRampToValueAtTime(gain,this.ctx.currentTime+start+.015);
+    g.gain.exponentialRampToValueAtTime(0.0001,this.ctx.currentTime+start+duration);
+    o.connect(g); g.connect(this.ctx.destination); o.start(this.ctx.currentTime+start); o.stop(this.ctx.currentTime+start+duration+.03);
+  },
+  correct(){
+    this.tone(523.25,.13,0,"sine",.07);
+    this.tone(659.25,.13,.09,"sine",.07);
+    this.tone(783.99,.20,.18,"sine",.08);
+    burst();
+  },
+  wrong(){
+    this.tone(220,.16,0,"triangle",.045);
+    this.tone(175,.20,.10,"triangle",.04);
+  },
+  click(){this.tone(360,.06,0,"sine",.025)}
+};
+function burst(){
+  const icons=["⭐","✨","🎉","💊","🧬"];
+  for(let i=0;i<16;i++){
+    const s=document.createElement("span"); s.className="confetti";
+    s.textContent=icons[Math.floor(Math.random()*icons.length)];
+    s.style.left=(5+Math.random()*90)+"vw";
+    s.style.animationDelay=(Math.random()*.18)+"s";
+    document.body.appendChild(s);
+    setTimeout(()=>s.remove(),1500);
+  }
+}
+
+let score=0, currentQuiz=0;
+function addScore(n){score+=n;document.getElementById("score").textContent=score}
+function nextScreen(id){document.querySelectorAll(".screen").forEach(x=>x.classList.remove("active"));document.getElementById(id).classList.add("active");window.scrollTo(0,0)}
+function updateBar(n){document.getElementById("bar").style.width=n+"%"}
+function startGame(){AudioFX.click();score=0;document.getElementById("score").textContent=0;buildOrder();updateBar(10);nextScreen("order")}
+function buildOrder(){
+const path=document.getElementById("path"), pieces=document.getElementById("pieces");path.innerHTML="";pieces.innerHTML="";
+for(let i=0;i<5;i++){let s=document.createElement("div");s.className="slot";s.dataset.pos=i;s.innerHTML="<small>Etapa "+(i+1)+"</small><span>Solte aqui</span>";s.onclick=()=>selectPieceForSlot(s);path.appendChild(s);if(i<4){let a=document.createElement("div");a.className="arrow";a.textContent="→";path.appendChild(a)}}
+[...stages].sort(()=>Math.random()-.5).forEach((st,i)=>{let p=document.createElement("div");p.className="piece";p.draggable=true;p.dataset.name=st.name;p.textContent=st.icon+" "+st.name;p.onclick=()=>selectPiece(p);p.ondragstart=e=>e.dataTransfer.setData("text/plain",st.name);pieces.appendChild(p)})
+document.querySelectorAll(".slot").forEach(s=>{s.ondragover=e=>e.preventDefault();s.ondrop=e=>{let name=e.dataTransfer.getData("text/plain");putInSlot(s,name)}})
+}
+let selected=null;
+function selectPiece(p){if(p.classList.contains("used"))return;selected=p;document.querySelectorAll(".piece").forEach(x=>x.style.outline="");p.style.outline="4px solid #8fc3eb"}
+function selectPieceForSlot(s){if(selected){putInSlot(s,selected.dataset.name);selected.style.outline="";selected=null}}
+function putInSlot(s,name){if(s.classList.contains("filled"))return;let p=[...document.querySelectorAll(".piece")].find(x=>x.dataset.name===name);if(!p||p.classList.contains("used"))return;s.classList.add("filled");s.dataset.name=name;s.querySelector("span").textContent=name;p.classList.add("used")}
+function checkOrder(){
+let slots=[...document.querySelectorAll(".slot")], correct=slots.every((s,i)=>s.dataset.name===stages[i].name), f=document.getElementById("orderFeedback");
+if(correct){AudioFX.correct();addScore(20);f.className="feedback ok";f.textContent="🎉 Perfeito! O caminho ADME está correto. +20 pontos";document.getElementById("checkOrder").disabled=true;updateBar(25);setTimeout(()=>{buildADME();nextScreen("adme")},900)}
+else{AudioFX.wrong();f.className="feedback bad";f.textContent="❌ A sequência ainda não está correta. Tente reorganizar as etapas."}
+}
+function buildADME(){
+let box=document.getElementById("admeContent");box.innerHTML="";
+stages.forEach((s,i)=>{let d=document.createElement("div");d.className="card";d.style.cursor="pointer";d.innerHTML=`<div class="stage"><div class="icon">${s.icon}</div><div><h3>${i+1}. ${s.name}</h3><p>${s.text}</p></div></div>`;box.appendChild(d)})
+}
+const questions=[
+["Qual etapa representa a transformação química do fármaco, frequentemente realizada no fígado?",["Absorção","Distribuição","Metabolismo","Excreção"],2],
+["Qual conceito indica a fração da dose que chega à circulação sistêmica?",["Biodisponibilidade","Potência","Afinidade","Eficácia"],0],
+["O que geralmente pode ocorrer quando a eliminação renal de um fármaco diminui?",["Menor exposição em todos os casos","Aumento da exposição, dependendo do fármaco","Absorção imediata","Desaparecimento do efeito"],1],
+["Farmacodinâmica estuda principalmente:",["O caminho do fármaco pelo organismo","O que o organismo faz com o fármaco","Os efeitos e mecanismos do fármaco no organismo","Somente a excreção"],2]
+];
+function buildQuiz(){renderQuestion()}
+function renderQuestion(){
+let q=questions[currentQuiz], box=document.getElementById("quizBox");box.innerHTML=`<p><span class="badge">Pergunta ${currentQuiz+1} de ${questions.length}</span></p><h3>${q[0]}</h3><div class="options">${q[1].map((x,i)=>`<button class="option" onclick="quizAnswer(this,${i===q[2]})">${String.fromCharCode(65+i)}) ${x}</button>`).join("")}</div><div id="quizFeedback" class="feedback"></div>`;
+}
+function quizAnswer(btn,correct){
+document.querySelectorAll("#quizBox .option").forEach(x=>x.disabled=true);let f=document.getElementById("quizFeedback");
+if(correct){AudioFX.correct();addScore(10);btn.classList.add("correct");f.className="feedback ok";f.textContent="✅ Correto! +10 pontos"}else{AudioFX.wrong();btn.classList.add("wrong");f.className="feedback bad";f.textContent="❌ Incorreto. Revise o conceito e continue."}
+setTimeout(()=>{currentQuiz++;if(currentQuiz<questions.length)renderQuestion();else{updateBar(70);nextScreen("case")}},1100)
+}
+function caseAnswer(btn,correct){
+document.querySelectorAll("#case .option").forEach(x=>x.disabled=true);let f=document.getElementById("caseFeedback");
+if(correct){AudioFX.correct();addScore(20);btn.classList.add("correct");f.className="feedback ok";f.textContent="🎉 Correto! +20 pontos. A menor eliminação pode aumentar a exposição ao medicamento."}
+else{btn.classList.add("wrong");f.className="feedback bad";f.textContent="❌ Revise a relação entre função renal, eliminação e concentração."}
+setTimeout(()=>{updateBar(88);nextScreen("glossary")},1200)
+}
+function finishGame(){updateBar(100);document.getElementById("finalScore").textContent=score;document.getElementById("performance").textContent=score>=70?"Excelente! Você demonstrou domínio dos conceitos revisados.":score>=50?"Muito bem! Revise alguns pontos e tente novamente.":"Continue estudando e jogue novamente para reforçar o conteúdo.";nextScreen("finish")}
+window.addEventListener("DOMContentLoaded", function(){
+  document.querySelectorAll(".screen").forEach(function(x){x.classList.remove("active")});
+  document.getElementById("home").classList.add("active");
+  var startBtn = document.getElementById("startBtn");
+  if (startBtn) startBtn.addEventListener("click", function(e){
+    e.preventDefault();
+    startGame();
+  });
+  buildQuiz();
+});
+</script>
+</body>
+</html>
